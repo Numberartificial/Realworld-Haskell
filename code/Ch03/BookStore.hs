@@ -1,4 +1,3 @@
-
 --NOTE BookInfo is a Type Constructor which must start with a capital letter
 --NOTE Book is a Value Constructor whci must also start with a capital letter
 --NOTE both Type Constructor and Value Constuctor are function.Hense, there is no more other thing except function in Pure Function world.
@@ -61,3 +60,73 @@ inside (a, b, (x : xs)) = sumList xs
 --NOTE GHC compile option, -fwarn-incomplete-patterns
 {- badPattern [] will cause Exption: Non-exhaustive patterns in function pattern-}
 badPattern (x:xs) = x
+
+--NOTE Record, no more boilerplate,bulky,irksome,tedious,repetitive. And then Lens.
+data Customer = Customer {
+      customerID      :: CustomerID
+    , customerName    :: String
+    , customerAddress :: Address
+    } deriving (Show)
+
+customer1 = Customer 271828 "J.R. Hacker"
+            ["255 Syntax Ct",
+             "Milpitas, CA 95134",
+             "USA"]
+
+--NOTE we can vary order in which list fields.
+customer2 = Customer {
+              customerAddress = ["1048576 Disk Drive",
+                                 "Milpitas, CA 95134",
+                                 "USA"]
+            , customerID = 271828
+            , customerName = "Jane Q. Citizen"
+            }
+
+-- data Maybe a = Just a | Nothing
+
+--NOTE null or nil is a bad thing.
+data Olist a = Con a (Olist a) | Empty
+               deriving (Show)
+
+olist = Con 1 Empty
+
+data Tree a = Node a (Tree a) (Tree a)
+            | Leaf
+              deriving (Show)
+
+fromList :: [a] -> Olist a
+fromList (x:xs) = Con x $ fromList xs
+fromList [] = Empty
+
+toList :: Olist a -> [a]
+toList (Con a xs) = a : (toList xs)
+toList Empty = []
+
+data MaybeTree a = MaybeTree (Maybe a)
+
+terminator = error "no callback, running done"
+
+safeSecond :: [a] -> Maybe a
+
+safeSecond [] = Nothing
+safeSecond xs = if null (tail xs)
+                then Nothing
+                else Just (head (tail xs))
+
+tidySecond :: [a] -> Maybe a
+
+tidySecond (_:x:_) = Just x
+tidySecond _       = Nothing
+
+--NOTE Closure, let bindings a expression(a couple of ).
+lend amount balance = let reserve    = 100
+                          newBalance = balance - amount
+                      in if balance < reserve
+                         then Nothing
+                         else Just newBalance
+
+
+--NOTE this is a 't' because there is no use of function parameter 'a' in this function. USE GHC option -fwarn-name-shadowing to see the shadowing name.
+quux :: t -> [Char]
+quux a = let a = "foo"
+         in a ++ "eek!"
