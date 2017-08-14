@@ -1,4 +1,4 @@
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, putMVar, takeMVar, newEmptyMVar)
 import Control.Exception (handle)
 import Control.Monad (forever)
 import qualified Data.ByteString.Lazy as L
@@ -25,7 +25,17 @@ folkThead = do
         -- NOTE should modify like this
            handle ((\e -> print e) :: IOError -> IO ()) $ do
              content <- L.readFile name
+             -- NOTE multi thread share the same *name* AND *content*
              forkIO (compressFile name content)
              return ()
-           main
+           folkThead
   where compressFile path = L.writeFile (path ++ ".gz") . compress
+-- NOTE synchronizing variable type
+
+communicate = do
+  m <- newEmptyMVar
+  forkIO $ do
+    v <- takeMVar m
+    putStrLn ("received " ++ show v)
+  putStrLn "sending"
+  putMVar m "wake up!"
