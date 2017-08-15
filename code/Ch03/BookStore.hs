@@ -1,3 +1,6 @@
+import Data.List (sortBy)
+import Data.Ord (comparing)
+
 --NOTE BookInfo is a Type Constructor which must start with a capital letter
 --NOTE Book is a Value Constructor whci must also start with a capital letter
 --NOTE both Type Constructor and Value Constuctor are function.Hense, there is no more other thing except function in Pure Function world.
@@ -130,3 +133,55 @@ lend amount balance = let reserve    = 100
 quux :: t -> [Char]
 quux a = let a = "foo"
          in a ++ "eek!"
+
+nodesAreSame (Node a _ _) (Node b _ _)
+  | a == b = Just a
+  | otherwise = Nothing
+
+nodesAreSame _ _ = Nothing
+
+lend3 amount balance
+     | amount <= 0            = Nothing
+     | amount > reserve * 0.5 = Nothing
+     | otherwise              = Just newBalance
+    where reserve    = 100
+          newBalance = balance - amount
+
+niceDrop n xs | n <= 0 = xs
+niceDrop _ []          = []
+niceDrop n (_:xs)      = niceDrop (n - 1) xs
+
+--NOTE EXERCISE
+
+length' :: Num t => [t1] -> t
+length' [] = 0
+length' (_:xs) = 1 + length' xs
+
+palindrome xs = xs ++ reverse xs
+
+isPalindrome xs = xs == reverse xs
+
+sortByLenth xs =
+  sortBy (comparing length) xs
+
+intersperse seperator (x:xs) = foldl (\b a -> b ++ [seperator] ++ a) x xs
+intersperse seperator _ = []
+
+height (Node a left right) =
+  maximum [height left, height right] + 1
+height Leaf = 1
+
+data Point t = Point t t
+
+data Direction = DLeft | DRight | DStraight
+
+turn ::
+  (Num t, Ord t) => Point t -> Point t -> Point t -> Direction
+turn (Point ax ay) (Point bx by) (Point cx cy)
+  | dp > 0 = DLeft
+  | dp < 0 = DRight
+  | dp == 0 = DStraight
+  where dp = ((ay - by)*(cx - bx)) + ((bx - ax)*(cy - by))
+
+turns l@(a:b:c:xs) = (turn a b c) : (turns $ tail l)
+turns _ = []
