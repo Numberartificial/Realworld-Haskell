@@ -1,6 +1,6 @@
 -- file "Ch04/InteractWith.hs"
 import System.Environment (getArgs)
-import Data.Char (isUpper)
+import Data.Char (toUpper, isUpper)
 import Data.List --(isPrefixOf, isSuffixOf, null, length, head, tail)
 
 --NOTE ghc --make InteractWith.hs produce the excutable file.
@@ -103,3 +103,54 @@ splitWith p xs
 
 firstWordOfEachLine :: String -> String
 firstWordOfEachLine = unlines . map (head . words) . lines
+
+--NOTE loop
+loop acc [] = acc
+loop acc (x:xs) = loop (acc * 10 + x) xs
+
+upperCase2 xs = map toUpper xs
+
+--NOTE left and right is associated with associative
+{-Both foldr and foldl consume the list from left to right, so that's not the reason we refer to foldl as "left fold".
+
+foldl _evaluates_ from left to right (left-associative)
+foldr _evaluates_ from right to left (right-associative)-}
+foldlD :: (a -> b -> a) -> a -> [b] -> a
+foldlD step zero (x:xs) = foldlD step (step zero x) xs
+foldlD _    zero []     = zero
+
+foldrD step zero (x:xs) = step x (foldrD step zero xs)
+foldrD _  zero [] = zero
+
+mysum xs = foldlD (+) 0 xs
+{-foldl (+) 0 (1:2:3:[])
+          == foldl (+) (0 + 1)             (2:3:[])
+          == foldl (+) ((0 + 1) + 2)       (3:[])
+          == foldl (+) (((0 + 1) + 2) + 3) []
+          ==           (((0 + 1) + 2) + 3)
+
+foldr (+) 0 (1:2:3:[])
+          == 1 +           foldr (+) 0 (2:3:[])
+          == 1 + (2 +      foldr (+) 0 (3:[])
+          == 1 + (2 + (3 + foldr (+) 0 []))
+          == 1 + (2 + (3 + 0))
+-}
+
+--NOTE primitive recursive wicth can express as foldr
+myFilter p xs = foldr step [] xs
+    where step x ys | p x       = x : ys
+                    | otherwise = ys
+
+myMap p xs = foldr step [] xs
+  where step x ys  = p x : ys
+
+--NOTE these two expressions are worth thinking everyday.
+foldlR f lzero xs = foldrD step id xs lzero
+  where step x g a = g (f a x)
+
+myFoldl :: (b -> a -> b) -> b -> [a] -> b
+myFoldl fl z xs = (foldr fr id xs) z
+  where l `fr` r = r . (`fl` l)
+
+inf = [1..]
+init1 = take 3 inf
